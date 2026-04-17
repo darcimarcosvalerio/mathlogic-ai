@@ -121,21 +121,88 @@ app.post<{ Body: RoadmapRequest }>(
       // -----------------------------------------------------------------------
       // INICIALIZAR MODELO
       // -----------------------------------------------------------------------
-      // Usando gemini-2.0-flash (modelo rápido e estável)
-      const model = genAI.getGenerativeModel(
-        { model: 'gemini-2.0-flash' }
-      );
+      // Mock para demonstração quando quota está excedida
+      const mockRoadmap = (subject: string, level: string): string => {
+        const levelText = {
+          'iniciante': 'beginner level',
+          'intermediário': 'intermediate level',
+          'avançado': 'advanced level'
+        }[level] || 'intermediate level';
 
-      // -----------------------------------------------------------------------
-      // CONSTRUIR PROMPT
-      // -----------------------------------------------------------------------
-      const levelDescriptions: Record<string, string> = {
-        'iniciante': 'beginner (with basics and fundamentals)',
-        'intermediário': 'intermediate (with practical applications)',
-        'avançado': 'advanced (with complex concepts and implementations)'
+        return `# ${subject} Study Roadmap - ${levelText}
+
+## 📚 Overview
+This is a comprehensive study roadmap for "${subject}" at ${levelText}.
+
+## 🎯 Learning Objectives
+- Understand fundamental concepts of ${subject}
+- Apply practical examples and exercises
+- Develop problem-solving skills
+- Master advanced applications
+
+## 📖 Core Topics
+
+### Phase 1: Foundations
+- Basic terminology and concepts
+- Historical context
+- Real-world applications
+
+### Phase 2: Practical Skills
+- Hands-on exercises
+- Code examples and demonstrations
+- Problem-solving techniques
+
+### Phase 3: Advanced Concepts
+- Complex applications
+- Integration with other domains
+- Project-based learning
+
+## 💻 Practical Exercises
+\`\`\`
+// Example exercises for ${subject}
+1. Basic concept implementation
+2. Intermediate problem-solving
+3. Advanced project work
+\`\`\`
+
+## 📚 Learning Resources
+- Online courses and tutorials
+- Books and documentation
+- Community forums and discussions
+- Practice problems and challenges
+
+## 🎓 Assessment
+- Regular quizzes
+- Practical projects
+- Real-world applications
+- Peer review and feedback
+
+---
+**Note**: This is a demo roadmap. Connect your Gemini API key for personalized, AI-generated content.`;
       };
 
-      const prompt = `You are an expert mathematics and programming teacher.
+      // Tentar usar a API, com fallback para mock
+      let roadmapContent: string;
+      
+      try {
+        // -----------------------------------------------------------------------
+        // INICIALIZAR MODELO
+        // -----------------------------------------------------------------------
+        // Usando gemini-2.0-flash (modelo rápido e estável)
+        const model = genAI.getGenerativeModel(
+          { model: 'gemini-2.0-flash' }
+        );
+
+        // -----------------------------------------------------------------------
+        // CONSTRUIR PROMPT
+        // -----------------------------------------------------------------------
+        const levelDescriptions: Record<string, string> = {
+          'iniciante': 'beginner (with basics and fundamentals)',
+          'intermediário': 'intermediate (with practical applications)',
+          'avançado': 'advanced (with complex concepts and implementations)'
+        };
+
+        const prompt = `You are an expert mathematics and programming teacher.
 
 Create a detailed study roadmap that connects the mathematical topic "${subject}" 
 with programming logic concepts at the ${levelDescriptions[level]} level.
@@ -150,15 +217,22 @@ Format the response in Markdown with:
 
 Be specific, engaging, and practical.`;
 
-      // -----------------------------------------------------------------------
-      // GERAR CONTEÚDO COM STREAMING
-      // -----------------------------------------------------------------------
-      const result = await model.generateContent(prompt);
-      const response = result.response;
-      console.log(`[SUCCESS] Roadmap gerado com sucesso para: ${subject}`);
+        // -----------------------------------------------------------------------
+        // GERAR CONTEÚDO
+        // -----------------------------------------------------------------------
+        const result = await model.generateContent(prompt);
+        const response = result.response;
+        roadmapContent = response.text();
+        console.log(`[SUCCESS] Roadmap gerado com sucesso para: ${subject}`);
+      } catch (apiError) {
+        // Usar mock se API falhar
+        console.warn(`[WARN] API indisponível, usando mock para ${subject}`);
+        console.warn(`[WARN] Erro: ${apiError instanceof Error ? apiError.message : String(apiError)}`);
+        roadmapContent = mockRoadmap(subject, level);
+      }
 
       return reply.send({
-        roadmap: response.text(),
+        roadmap: roadmapContent,
         subject,
         level,
         timestamp: new Date().toISOString()
