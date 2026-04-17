@@ -121,10 +121,9 @@ app.post<{ Body: RoadmapRequest }>(
       // -----------------------------------------------------------------------
       // INICIALIZAR MODELO
       // -----------------------------------------------------------------------
-      // Usando gemini-2.0-flash-exp para v1beta (modelo experimental com melhor suporte)
+      // Usando gemini-2.0-flash (modelo rápido e estável)
       const model = genAI.getGenerativeModel(
-        { model: 'gemini-2.0-flash-exp' },
-        { apiVersion: 'v1beta' }
+        { model: 'gemini-2.0-flash' }
       );
 
       // -----------------------------------------------------------------------
@@ -154,26 +153,16 @@ Be specific, engaging, and practical.`;
       // -----------------------------------------------------------------------
       // GERAR CONTEÚDO COM STREAMING
       // -----------------------------------------------------------------------
-      const result = await model.generateContentStream(prompt);
-
-      // Configurar headers para streaming
-      reply.raw.writeHead(200, {
-        'Content-Type': 'text/plain; charset=utf-8',
-        'Transfer-Encoding': 'chunked',
-        'Cache-Control': 'no-cache',
-        'X-Content-Type-Options': 'nosniff'
-      });
-
-      // Stream do conteúdo
-      for await (const chunk of result.stream) {
-        const chunkText = chunk.text();
-        if (chunkText) {
-          reply.raw.write(chunkText);
-        }
-      }
-
-      reply.raw.end();
+      const result = await model.generateContent(prompt);
+      const response = result.response;
       console.log(`[SUCCESS] Roadmap gerado com sucesso para: ${subject}`);
+
+      return reply.send({
+        roadmap: response.text(),
+        subject,
+        level,
+        timestamp: new Date().toISOString()
+      });
 
     } catch (error) {
       // -----------------------------------------------------------------------
@@ -230,8 +219,8 @@ const start = async () => {
 ║  Status: Running                                          ║
 ║  Host: ${HOST.padEnd(50)}║
 ║  Port: ${String(PORT).padEnd(50)}║
-║  API Version: v1beta                              ║
-║  Model: gemini-2.0-flash-exp                      ║
+║  API Version: v1 (REST)                            ║
+║  Model: gemini-2.0-flash                           ║
 ║                                                           ║
 ║  Available Endpoints:                                     ║
 ║  • GET  /health                 - Health check            ║

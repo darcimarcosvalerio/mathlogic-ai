@@ -1,6 +1,6 @@
 # 🌟 MathLogic AI: Mentor de Lógica e Algoritmos
 
-> **Status do Projeto:** 🛠️ Em Desenvolvimento (Ajustes de Integração com Gemini API v1)
+> **Status do Projeto:** ✅ Funcional - API Beta (Gemini 2.0 Flash Integrado)
 
 Bem-vindo ao **MathLogic AI**! Este projeto utiliza a inteligência do Google Gemini para transformar conceitos matemáticos complexos em trilhas de aprendizado de lógica de programação, entregando o conteúdo via Streaming para uma experiência em tempo real.
 
@@ -13,7 +13,7 @@ Bem-vindo ao **MathLogic AI**! Este projeto utiliza a inteligência do Google Ge
 | :--- | :--- |
 | **Runtime** | Node.js e Fastify (API de alta performance) |
 | **Linguagem** | TypeScript (Tipagem estrita e segurança) |
-| **Inteligência** | SDK GenAI do Google (Gemini 1.5 Flash) |
+| **Inteligência** | SDK GenAI do Google (Gemini 2.0 Flash) |
 | **Interface** | Next.js 15, React 19 e Tailwind CSS v4 |
 | **Validação** | Zod (Garantia de integridade dos dados) |
 
